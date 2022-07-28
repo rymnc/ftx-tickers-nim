@@ -3,46 +3,12 @@ import asyncdispatch, ws
 import tables
 import strutils
 import std/threadpool
+import structs
+import vwap
 
 {.experimental.}
 
-type 
-  Data = object
-    action: string
-    bids: seq[array[2, float]]
-    asks: seq[array[2, float]]
 
-type 
-  TheirOrderbook = object
-    data: Data
-   
-
-type 
-  OurOrderbook = ref object 
-    bids, asks: Table[float, float]
-
-proc getVwap(orderbook: OurOrderbook): float = 
-  let bids = orderbook.bids
-  let asks = orderbook.asks
-
-
-  var weightedBids = 0.0
-  var weightedAsks = 0.0
-
-  var sumBidsVolume = 0.0
-  var sumAsksVolume = 0.0  
-
-  for key, val in bids:
-    let weight = key * val
-    sumBidsVolume += val
-    weightedBids += weight
-
-  for key, val in asks:
-    let weight = key * val
-    sumAsksVolume += val
-    weightedAsks += weight
-  
-  result = (weightedBids + weightedAsks) / (sumBidsVolume + sumAsksVolume)
 
 proc startStream(ticker: string) =
   var ws = waitFor newWebSocket("wss://ftx.com/ws/")
